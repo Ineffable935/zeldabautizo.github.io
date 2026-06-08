@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zelda Layla Ortega Garcia</title>
+    
+    <meta property="og:title" content="Bautizo y Primer Añito de Zelda Layla"> 
+    <meta property="og:description" content="Acompáñanos a celebrar este día tan especial."> 
+    <meta property="og:image" content="https://zeldabautizo.netlify.app/Imagenes/22.png"> 
+    <meta property="og:type" content="website">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght=0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           [1] VARIABLES GLOBALES Y RESET DE NAVEGADOR
+           ========================================= */
+        :root {
+            /* Almacena el código HEX del color dorado para reutilizarlo en todo el CSS */
+            --primary-gold: #CBA153; 
+            --text-dark: #4A4A4A;
+            --pink-accent: #E8839D; /* Color rosa uniforme para títulos y detalles */
+        }
+
+        body {
+            /* Diseño general del fondo fijo y propiedades tipográficas base */
+            background-color: #FCECEE; 
+            background-size: cover; 
+            background-attachment: fixed; 
+            color: var(--text-dark);
+            /* Uso de Flexbox para centrar todo el contenido verticalmente en la pantalla */
+            display: flex; flex-direction: column; align-items: center;
+            padding: 40px 20px; margin: 0;
+            -webkit-font-smoothing: antialiased; /* Suavizado de bordes en fuentes para Webkit (Chrome/Safari) */
+        }
+
+        /* =========================================
+           [2] CARGA DE FUENTES LOCALES PERSONALIZADAS
+           ========================================= */
+        @font-face { font-family: 'Thephir Personalizada'; src: url('./Font/thephir-light.ttf') format('truetype'); font-display: swap; }
+        @font-face { font-family: 'HyliaSerifBeta-Regular'; src: url('./Font/HyliaSerifBeta-Regular.otf') format('opentype'); font-display: swap; }
+        @font-face { font-family: 'The Wild Breath of Zelda'; src: url('./Font/The Wild Breath of Zelda.otf') format('opentype'); font-display: swap; }
+
+        /* =========================================
+           [3] COMPONENTES DE INTERFAZ (CAPAS Y MODALES)
+           ========================================= */
+        
+        /* Overlay Oscuro: Capa negra translúcida que cubre toda la pantalla (z-index 99) */
+        .overlay-oscuro {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85); 
+            /* Pointer-events impide interactuar con el fondo. Opacity 0 lo hace invisible por defecto */
+            z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+        }
+        /* Clase añadida dinámicamente por JS para mostrar el fondo negro */
+        .overlay-oscuro.activo { opacity: 1; pointer-events: auto; }
+
+        /* Modal de Mapas: Contenedor flotante centrado matemáticamente (z-index 110) */
+        #contenedorMapaModal {
+            /* Centrado absoluto usando top/left al 50% y transform -50% para compensar su propio tamaño */
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+            width: 90%; max-width: 400px; background: #fff; padding: 15px; border-radius: 12px;
+            z-index: 110; opacity: 0; pointer-events: none; transition: all 0.3s ease;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+        }
+        #contenedorMapaModal.activo { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+        
+        .btn-cerrar-mapa {
+            align-self: flex-end; background-color: var(--primary-gold); color: white;
+            border: none; border-radius: 50%; width: 35px; height: 35px; font-weight: bold;
+            cursor: pointer; margin-bottom: 10px; font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Micro-interacción: Animación sutil de zoom en el eje Z al pasar el ratón o tocar */
+        .efecto-interactivo { transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); will-change: transform; }
+        .efecto-interactivo:hover { transform: scale(1.03); }
+        /* Efecto de pulsación táctil (click feel) */
+        .efecto-interactivo:active { transform: scale(0.98); } 
+
+        /* Contenedor principal de la tarjeta de invitación */
+        .invitation-container {
+            max-width: 460px; width: 100%;
+            background-color: #FCECEE; 
+            background-size: 100% 100%;
+            border-radius: 10px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5); 
+            padding-bottom: 40px; text-align: center; position: relative; overflow: hidden;
+            /* Animación de entrada al cargar la página */
+            animation: containerEntrance 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Fotogramas clave para hacer flotar la invitación desde abajo hacia su posición final */
+        @keyframes containerEntrance { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* =========================================
+           [4] ESTRUCTURAS DE DISEÑO INTERNO (Banners, Fotos, Textos)
+           ========================================= */
+        .banner-container { position: relative; width: 100%; display: flex; justify-content: center; }   
+        .floral-banner { display: block; margin: 0; width: 100%; max-width: 100%; height: auto; position: relative; z-index: 5; }
+        .banner-text { position: absolute; z-index: 10; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; text-align: center; }        
+
+        /* Contenedor Flex para alinear la imagen del "1" y el texto adyacente en la misma fila horizontal */
+        .flex-contenedor-bautizo { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 20px; width: 100%; margin: 20px 0; }
+        .columna-izquierda-img { position: relative; width: 130px; }
+        .zelda-cumpleañera { display: block; width: 60%; margin: 0 auto; position: relative; }
+        .primer-año { width: 100%; height: auto; position: relative; z-index: 1; display: block; }
+        /* Posicionamiento absoluto para superponer flores con una rotación técnica de 15 grados */
+        .flores-superpuestas { position: absolute; top: -30px; left: -15px; width: 120px; z-index: 10; transform-origin: center center; transform: rotate(+15deg); }
+        .columna-derecha-texto { text-align: center; }
+
+        /* =========================================
+           [5] FUNCIONALIDAD DE FOTOGRAFÍA CON ZOOM (Hero Image)
+           ========================================= */
+        .hero-image-area {
+            position: relative; width: 100%; height: 350px;
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 10px; z-index: 2; transition: transform 0.5s ease, z-index 0.5s ease;
+            /* touch-action: none; Desactiva comportamientos nativos táctiles como scroll para priorizar el JS */
+            touch-action: none; 
+        }
+
+        /* Clase dinámica inyectada por JS para crear el efecto de pantalla completa de la foto */
+        .enfoque-activo { transform: scale(1.6) !important; z-index: 100 !important; }
+
+        /* Máscara circular estricta usando border-radius y overflow hidden para la foto del bebé */
+        .mascara-recorte {
+            position: absolute; width: 265px; height: 265px;
+            border-radius: 50%; overflow: hidden; 
+            z-index: 3; display: flex; align-items: center; justify-content: center;
+            transition: border-radius 0.5s ease, width 0.5s ease, height 0.5s ease; 
+        }
+
+        .baby-photo { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        
+        /* El marco floral ahora es el área interactiva activa para la pulsación */
+        .floral-frame {
+            position: absolute; width: 310px; height: 310px; z-index: 4; 
+            transition: opacity 0.3s ease;
+            pointer-events: auto; /* Permite interacciones de ratón/toque sobre el marco */
+            cursor: pointer;
+        }
+        .hero-image-area.enfoque-activo .floral-frame { opacity: 100; }
+
+        /* Botón de la X para cerrar la foto, posicionado en la esquina superior derecha de la pantalla (fixed) */
+        .btn-cerrar-foto {
+            position: fixed; top: 30px; right: 150px; width: 45px; height: 45px;
+            background-color: var(--primary-gold); color: white; border: none; border-radius: 50%;
+            font-size: 1.5rem; display: none; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 105; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Animación de pulsación constante para indicar interactividad (como el botón de música) */
+        /* CORRECCIÓN: La pulsación es circular y empieza desde el marco floral (border-radius: 50%) */
+        .area-interactiva-pulsante {
+            border-radius: 50%;
+            animation: constantCircularPulseSoft 3s infinite;
+        }
+
+        /* Fotogramas clave para la onda de radar dorada circular y suave */
+        @keyframes constantCircularPulseSoft {
+            0% { box-shadow: 0 0 0 0 rgba(203, 161, 83, 0.4); } /* Dorado suave circular */
+            70% { box-shadow: 0 0 0 10px rgba(203, 161, 83, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(203, 161, 83, 0); }
+        }
+
+        /* =========================================
+           [6] ESTILOS DEL REPRODUCTOR DE MÚSICA SIMULADO
+           ========================================= */
+        .reproductor-simulado-container { position: relative; width: 100%; display: flex; justify-content: center; align-items: center; margin-top: 0%; }
+        .img-reproductor-falso { width: 100%; height: auto; display: block; opacity: 0.9; margin-top: 0px;}
+        
+        .barra-progreso-wrapper { position: absolute; top: 25%; left: 10%; width: 80%; height: 6px; background-color: #F0D4D5; border-radius: 3px; z-index: 8; }
+        .barra-progreso-relleno { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background-color: #DDA2A4; border-radius: 3px; transition: width 0.3s linear; }
+        .barra-progreso-punto { position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%); width: 14px; height: 14px; background-color: #DDA2A4; border-radius: 50%; transition: left 0.3s linear; }
+
+        .boton-reproductor-invisible {
+            position: absolute; top: 68%; left: 51%; transform: translate(-50%, -50%); 
+            width: 48px; height: 48px; background-color: #DDA2A4; border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; z-index: 10;
+            animation: pulseWaveRosa 2.5s infinite; transition: transform 0.2s ease;
+        }
+        .boton-reproductor-invisible:hover, .boton-reproductor-invisible:active { transform: translate(-50%, -50%) scale(1.08); }
+        .boton-reproductor-invisible svg { width: 22px; fill: white; }
+
+        /* Animación de radar pulsante iterando en la sombra perimetral del botón play */
+        @keyframes pulseWaveRosa {
+            0% { box-shadow: 0 0 0 0 rgba(221, 162, 164, 0.6); }
+            70% { box-shadow: 0 0 0 15px rgba(221, 162, 164, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(221, 162, 164, 0); }
+        }
+
+        /* =========================================
+           [7] TIPOGRAFÍAS Y TARJETAS DE CONTENIDO (Plaques)
+           ========================================= */
+        .gold-cross { display: block; width: 20%; margin: 0 auto; position: relative; }
+        
+        .tarjeta-agradecimientos {
+            position: relative; width: 85%; max-width: 400px; margin: 40px auto 20px auto; 
+            padding: 50px 30px; background-image: url('./Imagenes/11.png'); background-size: 100% 100%; 
+            background-repeat: no-repeat; background-color: transparent; text-align: center; z-index: 2;
+        }
+        .adorno-moño-izquierdo { position: absolute; top: -10px; left: 10px; width: 140px; z-index: 10; transform: rotate(-25deg) scale(1.2)}
+        .adorno-paloma-derecha { position: absolute; top: -30px; right: 20px; width: 90px; z-index: 10; transform: rotate(0deg) scale(1.4)}
+
+        /* Asignación estricta de las familias tipográficas importadas en el @font-face */
+        .texto-agradezco { font-family: 'Cormorant Garamond', serif; font-size: 25px; font-weight: bold; color: #333333; margin-bottom: 5px; margin-top: 10px; }
+        .titulos-rosas-cursiva { font-family: 'Thephir Personalizada', sans-serif; font-size: 2.8rem; color: #F88E9D; margin: 5px 0; font-weight: normal; line-height: 1; }
+        .nombres-familia { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #555555; margin: 5px 0; line-height: 1.4; letter-spacing: 0.5px; }
+        .frase-agradecimiento { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: #222222; font-weight: bold; margin: 10px 0 20px 0; }
+
+        .Titulo-50-T { font-family: 'Thephir Personalizada', sans-serif; font-size: 50px; color: #E8839D; font-weight: normal; line-height: 1.1; margin: 0; }
+        .Titulo-35-T { font-family: 'Thephir Personalizada', sans-serif; font-size: 35px; color: #E8839D; font-weight: normal; line-height: 1.1; margin: 0; }
+        .Titulo-20-T { font-family: 'Thephir Personalizada', sans-serif; font-size: 20px; color: #E8839D; font-weight: normal; line-height: 1.1; margin: 0; } 
+        .Titulos-40-C { font-family: 'Cormorant Garamond', serif; font-size: 40px; color: #000000; font-weight: normal; margin-bottom: 20px; position: relative; z-index: 2; }
+        .Titulos-30-C { font-family: 'Cormorant Garamond', serif; font-size: 30px; color: #000000; font-weight: bold; margin-bottom: 20px; position: relative; z-index: 2; }
+        .Titulos-22-C { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #000000; font-weight: bold; margin-bottom: 20px; position: relative; z-index: 2; }        
+        .Titulos-15-C { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #000000; font-style: italic; margin-bottom: 20px; position: relative; z-index: 2; }
+        .Titulos-30-Z { font-family: 'HyliaSerifBeta-Regular', serif; font-size: 30px; color: #E8839D; font-weight: bold; margin-bottom: 20px; position: relative; z-index: 2; }
+        
+        /* --- ESTILOS DE ALINEACIÓN DE FECHA --- */
+        /* CORRECCIÓN: Contenedor Grid de 3 columnas iguales para alinear Domingo y Julio en sus tercias laterales */
+        .date-display-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* Tres columnas de igual ancho (tercias) */
+            align-items: center;
+            justify-items: center; /* Centra contenido dentro de cada columna */
+            font-family: 'Thephir Personalizada', sans-serif;
+            color: var(--pink-accent);
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        /* Estilo específico para el número 26 resaltado (Columna central del Grid) */
+        .date-number-highlight {
+            grid-column: 2; /* Forza al 26 a estar en la columna central exacta */
+            font-size: 50px;
+            font-weight: bold;
+            line-height: 1;
+            position: relative;
+            top: -2px;
+        }
+        
+        /* --- ESTILOS TARJETAS DE UBICACIÓN (Restaurado formato anterior SVG) --- */
+        /* Cajas de fondo SVG interactivo, Flexbox horizontal */
+        .location-pill-card {
+            position: relative; width: 90%; max-width: 400px; margin: 15px auto;
+            display: flex; /* Flexbox para alineación horizontal de icono y texto */
+            align-items: center; /* Centrado vertical interno */
+            gap: 15px; /* Espaciado uniforme entre los elementos */
+            text-align: left; /* Texto alineado a la izquierda */
+            box-sizing: border-box; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background-image: url('./Imagenes/14.5.svg'); background-size: 100% 100%; background-repeat: no-repeat; background-color: transparent; border: none; 
+            padding: 40px 35px; z-index: 2;
+        }
+
+        /* Moño rosa posicionado absolutamente en la esquina superior derecha de la píldora */
+        .pink-bow-corner {
+            position: absolute;
+            top: -15px;
+            right: -10px;
+            width: 50px;
+            z-index: 5; /* Asegura que el moño esté por encima del borde de la tarjeta */
+        }
+
+        /* Estilo para los títulos de ubicación (acuarela rosa) */
+        .location-pill-card h4 {
+            color: var(--pink-accent);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            margin-top: 0;
+        }
+
+        /* Estilo para el texto de dirección y hora */
+        .location-pill-card p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            margin: 3px 0;
+            line-height: 1.3;
+            color: #333;
+        }
+
+        /* Iconos de acuarela (Iglesia/Pastel) fijos a la izquierda */
+        .location-icon-center {
+            width: 80px;
+            flex-shrink: 0; /* Evita que el icono se deforme */
+        }
+
+        /* --- ESTILOS SECCIÓN NOTA DE REGALO (Capas: Imagen-Texto-Flor) --- */
+        /* Contenedor relativo para posicionar el texto y la flor de Peonía sobre la imagen */
+        .gift-note-section {
+            position: relative;
+            margin-top: 30px;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Estilo de la imagen de papel rayado con los agujeros arriba */
+        .gift-note-image {
+            display: block;
+            margin: 0 auto;
+            width: 90%;
+            max-width: 400px;
+            height: auto;
+        }
+
+        /* Contenedor absoluto para posicionar el texto perfectamente alineado sobre el papel rayado */
+        .gift-note-text-wrapper {
+            position: absolute;
+            top: 15%; /* Ajuste fino visual para alinearlo con las líneas del papel */
+            left: 10%;
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 70%;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: #555;
+            font-weight: bold;
+            line-height: 1.4;
+            text-align: center;
+            z-index: 5;
+        }
+
+        /* Flor Peonía posicionada absolutamente en la parte inferior derecha de la nota */
+        .gift-note-peony {
+            position: absolute;
+            bottom: -20px; /* Sobresale un poco del papel */
+            right: 10px;
+            width: 100px;
+            z-index: 10;
+        }
+
+        /* --- ESTILOS TARJETAS DE REGISTRO/TALLA (Restaurado formato anterior SVG) --- */
+        /* Cajas de fondo SVG interactivo, Flexbox horizontal */
+        .registry-pill-card {
+            position: relative; width: 90%; max-width: 400px; margin: 15px auto;
+            display: flex; /* Flexbox para alineación horizontal de icono y texto */
+            align-items: center; /* Centrado vertical interno */
+            gap: 15px; /* Espaciado entre icono y bloque de texto */
+            text-align: left; /* Texto alineado a la izquierda */
+            box-sizing: border-box; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background-image: url('./Imagenes/14.5.svg'); background-size: 100% 100%; background-repeat: no-repeat; background-color: transparent; border: none; 
+            padding: 40px 35px; z-index: 2;
+        }
+
+        /* Icono de registro (Regalo/Romper) fijo a la izquierda */
+        .registry-icon {
+            width: 60px;
+            flex-shrink: 0; /* Evita que el icono se deforme si el texto es largo */
+        }
+
+        /* Contenedor del bloque de texto a la derecha del icono */
+        .registry-content {
+            display: flex;
+            flex-direction: column; /* Apilado vertical interno */
+            justify-content: center;
+        }
+
+        /* Estilo del título del registro (color rosa acuarela) */
+        .registry-content h4 {
+            color: var(--pink-accent);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            margin: 0 0 3px 0;
+            font-weight: bold;
+        }
+
+        /* Estilo del número de ID resaltado (Thephir font, underlined) */
+        .registry-id {
+            font-family: 'Thephir Personalizada', sans-serif;
+            color: var(--pink-accent);
+            font-size: 1.5rem;
+            text-decoration: underline; /* Subrayado técnico */
+            margin-top: 5px;
+            line-height: 1;
+        }
+
+        /* Estilo estándar para detalles de texto (talla, etc.) */
+        .registry-content p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.9rem;
+            color: #777; /* Color gris suave */
+            margin: 0;
+        }
+
+        /* =========================================
+           [8] CONTROLES (Inputs y Botones)
+           ========================================= */
+        /* Estilizado en bloque para botones con degradado lineal dorado */
+        .action-link-btn, .btn-rsvp { 
+            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #CBA153, #B58F43); color: white; 
+            text-decoration: none; padding: 12px 20px; border-radius: 30px; 
+            font-weight: bold; font-size: 0.9rem; width: 90%; margin-top: 12px; 
+            box-shadow: 0 5px 15px rgba(203, 161, 83, 0.3); transition: all 0.2s ease; 
+            cursor: pointer; border: none;
+        }
+        .action-link-btn:hover, .btn-rsvp:hover { box-shadow: 0 7px 20px rgba(203, 161, 83, 0.45); transform: translateY(-1px) scale(1.02); }
+
+        /* Estilizado del campo de texto, con transición sutil en los bordes al enfocarse (escribir) */
+        input {
+            padding: 12px 20px; border: 2px solid #ddd; border-radius: 25px;
+            font-size: 16px; width: 250px; transition: border-color 0.3s;
+        }
+        /* Pseudo-clase :focus para resaltar visualmente dónde escribe el usuario */
+        input:focus { border-color: var(--primary-gold); outline: none; }
+
+        /* Desactiva el botón de WhatsApp cuando el input no cumple la condición de longitud */
+        .btn-rsvp.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; box-shadow: none; }
+        
+    </style>
+</head>
+
+<body>
+    <audio id="audioRisa" src="./Audio/risa.mp3" preload="auto"></audio>
+
+    <div id="overlayOscuro" class="overlay-oscuro"></div>
+
+    <div id="contenedorMapaModal">
+        <button id="btnCerrarMapa" class="btn-cerrar-mapa">X</button>
+        <iframe id="iframeMapa" width="100%" height="350" style="border:0; border-radius: 8px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+
+    <div class="invitation-container">
+        
+        <div class="reproductor-simulado-container efecto-interactivo">
+            <img src="./Imagenes/1.webp" class="floral-banner" alt="Adorno floral"> 
+            
+            <div class="banner-text" style="margin-top: 8px;">
+                <img src="./Imagenes/0.png" class="img-reproductor-falso" alt="Controles de audio"> 
+                
+                <div class="barra-progreso-wrapper" style="margin-top: -10px;">
+                    <div class="barra-progreso-relleno" id="progresoRelleno"></div>
+                    <div class="barra-progreso-punto" id="progresoPunto"></div>
+                </div>
+            </div>
+
+            <button class="boton-reproductor-invisible" id="audioTrigger" onclick="handleAudioPlayback()" style="margin-top: -30px;">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            
+            <div id="player" style="position: absolute; pointer-events: none; opacity: 0;"></div>
+        </div>
+
+        <div class="efecto-interactivo">
+            <img src="./Imagenes/2.webp" class="zelda-cumpleañera" alt="Cruz floral" style="margin-top: -10px;">
+        </div>
+
+        <div class="efecto-interactivo" style="margin-top: -60px;">
+            <h1 class="Titulos-40-C">Acompañanos a<br>celebrar mi</h1>            
+        </div>
+
+        <div class="flex-contenedor-bautizo efecto-interactivo" style="margin-top: -5px;">
+            <div class="columna-izquierda-img">
+                <img src="./Imagenes/3.png" class="primer-año" alt="Número 1">
+                <img src="./Imagenes/4.png" class="flores-superpuestas" alt="Flores">
+            </div>
+            <div class="columna-derecha-texto">
+                <h2 class="Titulo-50-T">Añito<br>&<br>Bautizo</h2>
+            </div>
+        </div>
+
+        <div class="hero-image-area efecto-interactivo" id="areaEnfoqueFoto" style="margin-top: -40px;">
+            <div class="mascara-recorte">
+                <img src="./Imagenes/6.webp" class="baby-photo" alt="Fotografía" style="scale: 1.5; margin-top: 150px;">
+            </div>
+            <img src="./Imagenes/5.webp" class="floral-frame area-interactiva-pulsante" id="marcoFloralInteractivo" alt="Marco floral interactivo">
+            <button id="btnCerrarEnfoque" class="btn-cerrar-foto">X</button>
+        </div>
+
+        <div class="banner-container efecto-interactivo" style="margin-top: -40px;">
+            <img src="./Imagenes/7.png" class="floral-banner" alt="Adorno floral">
+            <div class="banner-text">
+                <p class="Titulo-35-T">Zelda Layla<br>Ortega Garcia</p>
+            </div>
+        </div>
+
+        <div class="efecto-interactivo">
+            <img src="./Imagenes/8.png" class="gold-cross" alt="Cruz floral" style="margin-top: -10px;">
+        </div>
+
+        <div class="tarjeta-agradecimientos efecto-interactivo" style="margin-top: -1px;">
+            <img src="./Imagenes/10.png" class="adorno-moño-izquierdo" alt="Moño floral">
+            <img src="./Imagenes/9.png" class="adorno-paloma-derecha" alt="Paloma">
+            <p class="texto-agradezco">Agradezco a:</p>
+            <h3 class="titulos-rosas-cursiva">Mis padres</h3>
+            <p class="nombres-familia">Verónica García Guzmán<br>&<br>Yeshua David Ortega Marcial</p>
+            <p class="frase-agradecimiento">Por esperarme con tanto amor</p>
+            <h3 class="titulos-rosas-cursiva">Mi madrina</h3>
+            <p class="nombres-familia">Angelous Marjorie <br>Ortega Marcial</p>
+            <p class="frase-agradecimiento">Por guiarme en el camino de la fé</p>
+        </div>
+
+        <div class="efecto-interactivo zelda-cumpleañera" style="z-index: 10; margin-top: -35px; margin-left: 85px; scale: 1.4;">
+            <img src="./Imagenes/12.png" alt="">
+        </div>
+
+        <div class="efecto-interactivo" style="margin: 50px auto; width: 100%;">
+            <img src="./Imagenes/13.png" class="floral-banner" alt="Adorno floral"> 
+            
+            <div class="date-display-grid Titulo-35-T">
+                <span>Domingo</span>
+                <span class="date-number-highlight">26</span>
+                <span>Julio</span>
+            </div>
+
+            <img src="./Imagenes/14.png" class="floral-banner" alt="Adorno floral">
+        </div>
+
+        <div class="location-pill-card efecto-interactivo">
+            <img src="./Imagenes/16.png" class="pink-bow-corner" alt="Moño rosa">
+            
+            <img src="./Imagenes/15.png" class="location-icon-center" alt="Iglesia de San Judas">
+            
+            <div class="location-text-block">
+                <h4>Iglesia de <br>San Judas tadeo</h4>
+                <p>Cam. Antiguo a Naolinco 3,</p>
+                <p>Campo de Tiro, 91107.</p>
+                <p><strong>12:00 PM</strong></p>
+                <button class="action-link-btn btn-abrir-mapa" data-mapa="https://www.google.com/maps/embed?pb=!4v1780899610378!6m8!1m7!1sI2GOOlDVI9mM_YnSNfBzXQ!2m2!1d19.56614145407573!2d-96.90126452857277!3f293.74448!4f0!5f0.7820865974627469" style="margin-top: 10px;">📍 Abrir Mapa de la iglesia</button>
+            </div>
+        </div>
+
+        <div class="location-pill-card efecto-interactivo">
+            <img src="./Imagenes/16.png" class="pink-bow-corner" alt="Moño rosa">
+            
+            <img src="./Imagenes/17.webp" class="location-icon-center" alt="Salón Chispas de color">
+            
+            <div class="location-text-block">
+                <h4>Salón Chispas <br>de color</h4>
+                <p>Calle Jose de Alvarado,</p>
+                <p>Av. Cdad. de las Flores 33 Colonia,</p>
+                <p>Ruben Pabello Acosta, 91113</p>
+                <button class="action-link-btn btn-abrir-mapa" data-mapa="https://www.google.com/maps/embed?pb=!4v1780899745434!6m8!1m7!1sENi5O73itEeLd_vMo2uA6w!2m2!1d19.56343478175827!2d-96.91318966506768!3f73.89779673201845!4f1.8183195826963754!5f2.8289030248342137" style="margin-top: 10px;">📍 Abrir Mapa del Evento</button>
+            </div>
+        </div>
+
+        <div class="gift-note-section efecto-interactivo">
+            <img src="./Imagenes/18.png" class="gift-note-image" alt="Nota rayada">
+            
+            <div class="gift-note-text-wrapper">
+                <p>Su compañía es lo <br>más preciado para <br>mí; si deseas tener <br>un detalle, aquí dejo <br>unas opciones</p>
+            </div>
+            
+            <img src="./Imagenes/19.png" class="gift-note-peony" alt="Flor Peonía">
+        </div>
+
+        <div class="registry-pill-card efecto-interactivo">
+            <img src="./Imagenes/20.png" class="registry-icon" alt="Regalo Liverpool">
+            
+            <div class="registry-content">
+                <h4>Mesa de Regalos de Liverpool</h4>
+                <p>NÚMERO DE MESA O CÓDIGO:</p>
+                <p class="registry-id">52012397</p>
+                <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/52012397" class="action-link-btn" style="width: 100%; margin-top: 10px;">🎁 Ver Mesa de Regalos</a>
+            </div>
+        </div>
+
+        <div class="registry-pill-card efecto-interactivo">
+            <img src="./Imagenes/20.5.png" class="registry-icon" alt="Talla">
+            
+            <div class="registry-content">
+                <h4>Talla:</h4>
+                <p class="registry-id">18 a 24 Meses</p>
+            </div>
+        </div>
+
+        <div class="tarjeta-agradecimientos efecto-interactivo" style="border: none; border-radius: 50px; background-image: url('./Imagenes/14.5.svg'); padding: 50px 35px;">
+            <input type="text" id="nombre-usuario" placeholder="Escribe tu nombre aquí..." required>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 15px;">Escribe tu nombre (Min. 6 letras) para confirmar asistencia</p>
+            <a href="#" id="whatsapp-btn" class="btn-rsvp disabled">
+                <span class="btn-text">Confirmar Asistencia</span>
+                <span class="btn-icon">💬</span>
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        /* --- 1. LÓGICA DEL REPRODUCTOR Y LA BARRA DE PROGRESO DE YOUTUBE --- */
+        // Inyección asíncrona de la API oficial de Iframe de Youtube
+        let tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.body.appendChild(tag);
+
+        // Variables de alcance de bloque globales para conectar a través de diferentes funciones lógicas
+        let player;
+        let progressInterval; 
+        const progressFill = document.getElementById('progresoRelleno');
+        const progressDot = document.getElementById('progresoPunto');
+
+        // Función del ciclo de vida reservada por YouTube que detona al cargar el script superior
+        function onYouTubeIframeAPIReady() {
+            // Inicializa la conexión del iframe en el Div invisible (Id = player)
+            player = new YT.Player('player', {
+                height: '0', width: '0', videoId: 'ypR0sPY8XwE', 
+                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+            });
+        }
+        
+        // Volumen maestro al 100% cuando la instancia esté pre-cargada
+        function onPlayerReady(event) { player.setVolume(100); }
+        
+        // Manejo de eventos de red y estado
+        function onPlayerStateChange(event) { 
+            // Si el video termina (State.ENDED), detona playVideo de nuevo (Ciclo infinito programado)
+            if (event.data === YT.PlayerState.ENDED) { player.playVideo(); }
+            // Si entra en reproducción, enciende el motor (setInterval) para calcular el progreso de la barra cada 500ms
+            if (event.data === YT.PlayerState.PLAYING) {
+                progressInterval = setInterval(actualizarBarra, 500);
+            } else {
+                // Suspende cálculos de fondo cuando no suena música, ahorrando ciclos de CPU
+                clearInterval(progressInterval);
+            }
+        }
+
+        // Operaciones algebraicas para manipular el CSS en tiempo real con respecto a la duración de la canción
+        function actualizarBarra() {
+            if (player && player.getDuration) {
+                // Regla de tres: (Tiempo_Actual / Tiempo_Total) * 100 = Porcentaje completado
+                const porcentaje = (player.getCurrentTime() / player.getDuration()) * 100;
+                progressFill.style.width = porcentaje + '%';
+                progressDot.style.left = porcentaje + '%';
+            }
+        }
+        
+        // Alternador (Toggle Switch) del control de usuario principal del botón de play
+        let audioActive = false;
+        function handleAudioPlayback() {
+            const trigger = document.getElementById('audioTrigger');
+            audioActive = !audioActive; // Intercambia Booleano (Si es true, se vuelve false y viceversa)
+            if (audioActive) {
+                player.playVideo(); 
+                // SVG vectorial inyectado matemáticamente para cambiar el triángulo por dos barras (Pausa)
+                trigger.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                trigger.style.animation = 'none'; // Detiene la onda de radar de animación Rosa
+            } else {
+                player.pauseVideo(); 
+                // Reinyecta SVG vectorial de triángulo (Play)
+                trigger.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                trigger.style.animation = 'pulseWaveRosa 2.5s infinite'; // Reinicia el llamado visual Rosa
+            }
+        }
+
+        // ALGORITMO MATEMÁTICO DE FADE (Atenuación volumétrica progresiva sin cortes bruscos)
+        function fadeYouTubeVolume(targetVolume, duration) {
+            if (!player || !player.getVolume) return;
+            let currentVolume = player.getVolume();
+            let distance = targetVolume - currentVolume; // Calcula la amplitud del ajuste
+            let steps = 20; // Framerate de atenuación: 20 divisiones acústicas
+            let stepTime = duration / steps; // Velocidad del temporizador entre divisiones
+            let stepAmount = distance / steps; // Cantidad geométrica a subir o bajar por división
+            let currentStep = 0;
+
+            let fadeInterval = setInterval(() => {
+                currentVolume += stepAmount;
+                player.setVolume(Math.round(currentVolume)); // Math.round requerido por la API para evitar floats
+                currentStep++;
+                // Termina y limpia la memoria al completar el recorrido volumétrico
+                if (currentStep >= steps) {
+                    clearInterval(fadeInterval);
+                    player.setVolume(targetVolume);
+                }
+            }, stepTime);
+        }
+
+        /* --- 2. LÓGICA DE FOTOGRAFÍA INTERACTIVA (Pulsación en el Marco Floral) --- */
+        // Referenciación de nodos (Caching en memoria local para rápida manipulación del DOM)
+        const photoAreaContainer = document.getElementById('areaEnfoqueFoto'); // Contenedor que hace zoom
+        const interactiveFrameArea = document.getElementById('marcoFloralInteractivo'); // Área de interacción (Pulsante)
+        const overlay = document.getElementById('overlayOscuro');
+        const btnCerrar = document.getElementById('btnCerrarEnfoque');
+        const audioRisa = document.getElementById('audioRisa');
+        
+        // Banderas (Flags booleanas) de control del estado global lógico
+        let fotoBloqueada = false;
+        let risaSonando = false; 
+        let tiempoInicio = 0;
+        let musicaYTEstabaSonando = false;
+
+        // Desactiva la acción por defecto del navegador de hacer clic derecho (menú contextual nativo) sobre la foto
+        photoAreaContainer.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Callbacks de manipulación de CSS dinámica inyectando/removiendo clases
+        function aplicarZoom() { 
+            photoAreaContainer.classList.add('enfoque-activo'); // Magnifica contenedor
+            interactiveFrameArea.classList.remove('area-interactiva-pulsante'); // Detiene la onda dorada al magnificar
+            overlay.classList.add('activo'); 
+        }
+        function removerZoom() {
+            if (!fotoBloqueada && !risaSonando) {
+                photoAreaContainer.classList.remove('enfoque-activo');
+                interactiveFrameArea.classList.add('area-interactiva-pulsante'); // Reactiva la onda dorada al minimizar
+                overlay.classList.remove('activo');
+                btnCerrar.style.display = 'none'; 
+            }
+        }
+
+        // Pointerdown: Escucha en el área ampliada del MARCO floral, unifica clicks/toques
+        interactiveFrameArea.addEventListener('pointerdown', (e) => {
+            if (e.target === btnCerrar || risaSonando) return; // Cláusula de guarda
+            tiempoInicio = Date.now(); // Captura marca de tiempo
+            aplicarZoom(); 
+        });
+
+        interactiveFrameArea.addEventListener('pointerup', (e) => {
+            if (e.target === btnCerrar || risaSonando) return; 
+            const tiempoPresionado = Date.now() - tiempoInicio; // Operación de cálculo delta
+            
+            // Sistema de Clic Inteligente: Clic rápido (menor a 250ms) Expande la foto y reproduce risa
+            if (tiempoPresionado < 250) {
+                fotoBloqueada = true; 
+                risaSonando = true;
+                btnCerrar.style.display = 'none'; // Se oculta la X temporalmente
+
+                // Si la música de fondo está sonando, dispara el Fade Down
+                if (player && player.getPlayerState) {
+                    musicaYTEstabaSonando = (player.getPlayerState() === YT.PlayerState.PLAYING);
+                    if (musicaYTEstabaSonando) fadeYouTubeVolume(5, 1000);
+                }
+
+                // API Nativa de Audio Web: Maneja la Promesa para evitar colapsos
+                audioRisa.play().catch(e => console.log("Requiere interacción previa"));
+
+                // Event listener del ciclo de vida del audio: Restauración programática al acabar
+                audioRisa.onended = () => {
+                    risaSonando = false;
+                    btnCerrar.style.display = 'flex'; // Vuelve a aparecer la X interactiva
+                    // Dispara el Fade Up para restaurar música de Youtube suavemente
+                    if (musicaYTEstabaSonando) fadeYouTubeVolume(100, 1000);
+                };
+
+            } else {
+                // Si fue un simple "toque mantenido" largo y lo soltó, revierte sin reproducir audios
+                if (!fotoBloqueada) { removerZoom(); }
+            }
+        });
+
+        // Evento que revierte el zoom si el dedo/cursor se desliza erráticamente fuera del área activa
+        interactiveFrameArea.addEventListener('pointerleave', () => { if (!fotoBloqueada && !risaSonando) { removerZoom(); } });
+        
+        // Reseteo duro al cerrar la X manualmente
+        btnCerrar.addEventListener('click', () => { 
+            if(!risaSonando){ 
+                fotoBloqueada = false; 
+                removerZoom(); 
+                audioRisa.pause(); 
+                audioRisa.currentTime = 0; // Regresa MP3 al segundo 0
+            } 
+        });
+    
+        /* --- 3. LÓGICA DE API WHATSAPP --- */
+        const inputNombre = document.getElementById('nombre-usuario');
+        const botonWA = document.getElementById('whatsapp-btn');
+        const telefono = "+522281817810"; 
+
+        // Listener reaccionando pulsación a pulsación para validación de seguridad (Client-side validation)
+        inputNombre.addEventListener('input', function() {
+            // Trim remueve espacios en blanco iniciales/finales. Chequeo lógico condicional:
+            if (this.value.trim().length >= 6) {
+                botonWA.classList.remove('disabled'); // Activa botón
+            } else {
+                botonWA.classList.add('disabled'); // Desactiva y oscurece
+            }
+        });
+
+        // Creación del puente API universal web hacia Whatsapp 
+        botonWA.addEventListener('click', function(e) {
+            e.preventDefault(); // Detiene el salto normal del hipervínculo <a> hacia la página actual
+            const nombre = inputNombre.value.trim();
+            // Función crítica: Formatea un mensaje universal escapando caracteres peligrosos de la URL a UTF-8 válidos (%20)
+            const mensaje = encodeURIComponent(`¡Hola! Mi nombre es ${nombre} y confirmo mi asistencia al evento.`);
+            // Abre una nueva pestaña/ventana ejecutando la invocación y enviando la variable
+            window.open(`https://wa.me/${telefono}?text=${mensaje}`, '_blank');
+        });
+
+        /* --- 4. LÓGICA DEL MAPA EMERGENTE (Iframes Dinámicos) --- */
+        // Extracción de todos los botones con clase btn-abrir-mapa como un NodeList iterable
+        const botonesMapa = document.querySelectorAll('.btn-abrir-mapa');
+        const modalMapa = document.getElementById('contenedorMapaModal');
+        const btnCerrarMapa = document.getElementById('btnCerrarMapa');
+        const iframeMapa = document.getElementById('iframeMapa');
+
+        // Bucle forEach que inyecta un listener individual a la cantidad X de mapas requeridos 
+        botonesMapa.forEach(boton => {
+            boton.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Extracción de metadatos (Data-Attribute) inyectados estáticamente en el HTML
+                const urlMapa = boton.getAttribute('data-mapa');
+                iframeMapa.src = urlMapa; // Carga dinámica del mapa solo cuando es solicitado (Lazy Allocation)
+                modalMapa.classList.add('activo');
+                overlay.classList.add('activo');
+            });
+        });
+
+        // Limpieza y manejo del cierre
+        function cerrarMapa() {
+            modalMapa.classList.remove('activo');
+            // Verificación: No retirar el overlay oscuro si resulta que la foto del bebe estaba expandida de fondo
+            if(!fotoBloqueada) { overlay.classList.remove('activo'); }
+            // Práctica de optimización: Desmonta el origen del marco. Evita procesamiento geográfico fantasma de Google gastando batería en móvil
+            iframeMapa.src = ''; 
+        }
+
+        btnCerrarMapa.addEventListener('click', cerrarMapa);
+        // Si haces click en cualquier parte negra, y el mapa está abierto, lo cierra intuitivamente
+        overlay.addEventListener('click', () => {
+            if (modalMapa.classList.contains('activo')) { cerrarMapa(); }
+        });
+
+    </script>
+</body>
+</html>
